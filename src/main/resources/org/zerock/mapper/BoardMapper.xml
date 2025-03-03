@@ -1,0 +1,132 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="org.zerock.mapper.BoardMapper">
+
+	<sql id="criteria">
+		<trim prefix="(" suffix=") AND " prefixOverrides="OR">
+			<foreach item='type' collection="typeArr">
+				<trim prefix="OR">
+					<choose>
+						<when test="type == 'T'.toString()">
+							title like '%'||#{keyword}||'%'
+						</when>
+						<when test="type == 'C'.toString()">
+							content like '%'||#{keyword}||'%'
+						</when>
+						<when test="type == 'W'.toString()">
+							writer like '%'||#{keyword}||'%'
+						</when>
+					</choose>
+				</trim>
+			</foreach>
+		</trim>
+	</sql>
+
+	<select id="getList" resultType="org.zerock.domain.BoardVO">
+	<![CDATA[
+		select * from keijiban where
+		bno > 0 and rownum <= 100
+		]]>
+	</select>
+
+	<insert id="insert">
+		insert into keijiban (bno,title,url,content,writer,regdate,updatedate,board_type)
+		values (seq_keijiban, #{title}, #{url}, #{content}, #{writer}, sysdate, sysdate, #{board_type})
+	</insert>
+
+	<insert id="insertSelectKey">
+
+		<selectKey keyProperty="bno" order="BEFORE"
+			resultType="long">
+			select seq_keijiban.nextval from dual
+		</selectKey>
+
+		insert into keijiban (bno,title,url,content,writer, regdate, updatedate, board_type)
+		values (#{bno}, #{title}, #{url}, #{content}, #{writer}, sysdate, sysdate, #{board_type})
+	</insert>
+
+	<select id="read" resultType="org.zerock.domain.BoardVO">
+		select * from keijiban where bno = #{bno}
+	</select>
+
+
+	<delete id="delete">
+		delete keijiban where bno = #{bno}
+	</delete>
+
+	<update id="update">
+		update keijiban
+		set title= #{title},
+		url= #{url},
+		content= #{content},
+		writer= #{writer},
+		regDate= #{regdate},
+		updateDate= sysdate,
+		board_type= #{board_type}
+		where bno = #{bno}
+	</update>
+
+	 <select id="getListWithPaging" resultType="org.zerock.domain.BoardVO"> 
+		
+		<![CDATA[
+		
+		select bno, title, content, url, writer, regdate, updatedate, board_type from ( 
+			
+			select /*+INDEX_DESC(keijiban pk_keijiban) */
+				
+				rownum rn, bno, title, content, url, writer, regdate, updatedate, board_type
+			
+			from keijiban where rownum <= #{pageNum} * #{amount} 
+				) where rn > (#{pageNum} -1) * #{amount}
+		
+		]]>
+		
+		</select>
+
+
+<!-- 	<select id="getListWithPaging"
+		resultType="org.zerock.domain.BoardVO">
+  <![CDATA[
+  select 
+    bno, title, url, content, writer, regdate, updatedate, board_type
+  from 
+      (
+      select /*+INDEX_DESC(keijiban pk_keijiban) */
+        rownum rn, bno, title, url, content, writer, regdate, updatedate, board_type
+      from 
+        keijiban
+      where board_type = #{board_type}
+      and
+  ]]>
+
+		<include refid="criteria"></include> 
+      
+  <![CDATA[    
+      rownum <= #{pageNum} * #{amount}
+      )
+  where rn > (#{pageNum} -1) * #{amount}   
+  ]]>
+	</select> -->
+
+	<select id="getTotalCount" resultType="int">
+		select count(*) from keijiban where
+
+		<include refid="criteria"></include>
+
+		bno > 0
+
+	</select>
+	
+	<select id="readUrl" resultType="org.zerock.domain.BoardVO">
+	
+	select * from keijiban where url = #{url}
+
+	</select>
+
+<!-- 	<update id="updateReplyCnt">
+		update keijiban set replycnt = replycnt + #{amount} where bno = #{bno}
+	</update> -->
+
+</mapper>

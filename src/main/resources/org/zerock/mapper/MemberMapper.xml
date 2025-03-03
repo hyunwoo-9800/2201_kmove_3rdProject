@@ -1,0 +1,145 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="org.zerock.mapper.MemberMapper">
+
+	<sql id="criteria">
+		<trim prefix="(" suffix=") AND " prefixOverrides="OR">
+			<foreach item='type' collection="typeArr">
+				<trim prefix="OR">
+					<choose>
+						<when test="type == 'T'.toString()">
+							title like '%'||#{keyword}||'%'
+						</when>
+						<when test="type == 'C'.toString()">
+							content like '%'||#{keyword}||'%'
+						</when>
+						<when test="type == 'W'.toString()">
+							writer like '%'||#{keyword}||'%'
+						</when>
+					</choose>
+				</trim>
+			</foreach>
+		</trim>
+	</sql>
+	
+	<select id="readBango" resultMap="memberMap">
+	
+	<![CDATA[
+	
+	select * from kojinnjyouhou
+	
+	 ]]>
+	 
+	</select>
+	
+		<select id="getListWithPaging"
+		resultType="org.zerock.domain.MemberVO">
+  <![CDATA[
+  select 
+    bango, id, password, namae, tannjyoubi, mail, dennwabanngo, regdate
+  from 
+      (
+      select
+        rownum rn, bango, id, password, namae, tannjyoubi, mail, dennwabanngo, regdate
+      from 
+        kojinnjyouhou
+
+		where
+
+  ]]>
+		<include refid="criteria"></include> 
+      
+  <![CDATA[    
+      rownum <= #{pageNum} * #{amount}
+      )
+  where rn > (#{pageNum} -1) * #{amount}   
+  ]]>
+	</select>
+
+	<resultMap type="org.zerock.domain.MemberVO" id="memberMap">
+		<id property="id" column="id" />
+		<result property="bango" column="bango" />
+		<result property="id" column="id" />
+		<result property="password" column="password" />
+		<result property="namae" column="namae" />
+		<result property="tannjyoubi" column="tannjyoubi" />
+		<result property="mail" column="mail" />
+		<result property="dennwabanngo" column="dennwabanngo" />
+		<result property="regDate" column="regDate" />
+		<collection property="authList" resultMap="authMap">
+		</collection>
+	</resultMap>
+
+	<resultMap type="org.zerock.domain.AuthVO" id="authMap">
+		<result property="id" column="id" />
+		<result property="authority" column="authority" />
+	</resultMap>
+
+	<select id="read" resultMap="memberMap">
+		SELECT
+		kojin.id, password, namae,
+		tannjyoubi, mail, dennwabanngo, regDate, authority
+		FROM
+		kojinnjyouhou
+		kojin LEFT OUTER JOIN
+		authorities2 auth on kojin.id = auth.id
+		WHERE
+		kojin.id =
+		#{id}
+	</select>
+
+
+	<insert id="insert">
+		insert into kojinnjyouhou
+		(bango,id,password,namae,tannjyoubi,mail,dennwabanngo,regDate)
+		values
+		(seq_kojinnjyouhou.nextval,
+		#{id}, #{password}, #{namae}, #{tannjyoubi},#{mail}, #{dennwabanngo},
+		sysdate)
+		
+		
+<!-- 		insert into authorities2 (id,authority) -->
+<!-- 		values (#{id},'ROLE_USER'); -->
+		
+	</insert>
+
+
+	<insert id="insertSelectKey">
+
+		<selectKey keyProperty="bango" order="BEFORE"
+			resultType="long">
+			select seq_kojinnjyouhou.nextval from dual
+		</selectKey>
+
+		insert into kojinnjyouhou (bango,id,password,namae,tannjyoubi,dennwabanngo,regdate)
+		values (#{id}, #{password}, #{namae}, #{tannjyoubi},#{dennwabanngo}, sysdate)
+	</insert>
+
+	<update id="update">
+		update kojinnjyouhou
+		set bango = #{bango},
+		password = #{password},
+		namae = #{namae},
+		tannjyoubi = #{tannjyoubi},
+		mail = #{mail},
+		dennwabanngo = #{dennwabanngo}
+		where id = #{id}
+	</update>
+
+	<select id="getTotalCount" resultType="int">
+		select count(*) from kojinnjyouhou where
+
+		<include refid="criteria"></include>
+
+		bango > 0
+
+	</select>
+	
+		<select id="idChk" resultType="int">
+	select count(*) from kojinnjyouhou where id = #{id}
+
+	</select>
+
+</mapper>

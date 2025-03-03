@@ -1,0 +1,89 @@
+
+
+
+
+-- 会員情報を保存するためのテーブル
+create table kaiinjyouhou(
+      bno number(10,0),
+      ID varchar2(50) not null primary key,
+      password varchar2(100) not null,
+      namae varchar2(100) not null,
+      dennwabanngo　number(12,0),
+      mail varchar2(100),
+      Birth date,
+      regdate date default sysdate, 
+      Admin char(1) default '0',
+      enabled char(1) default '1'
+      );
+
+
+--会員登録時にbnoに適用されるシーケンス
+CREATE SEQUENCE seq_kaiinjyouhou
+       INCREMENT BY 1
+       START WITH 1
+       MINVALUE 1
+       MAXVALUE 9999
+       NOCYCLE
+       NOCACHE
+       NOORDER;
+
+
+
+
+
+ -- 会員権限関連テーブル     
+ create table authorities2 (
+      name varchar2(100) not null,
+      authority varchar2(100) not null,
+      constraint fk_authorities_users foreign key(name) references users(name));
+      
+ create unique index ix_auth_username on authorities (name,authority);
+
+--test data
+insert into users (username, password) values ('user00','pw00');
+insert into users (username, password) values ('admin00','pw00');
+
+insert into authorities (username, authority) values ('user00','ROLE_USER');
+insert into authorities (username, authority) values ('admin00','ROLE_ADMIN');
+
+
+
+
+
+keijiban :	掲示板の種類7種類
+	1. nichiyou
+	2. suiyou
+	3. kinyou
+	4. oshirase
+	5. kouyuu
+	6. gakkou
+	7. seinen
+
+
+-- 掲示板関連テーブル
+create table keijiban(
+bno number(10,0),
+title varchar2(200) not null,
+url varchar2(200),
+content varchar2(2000) not null,
+writer varchar2(50) not null,
+regdate date,
+updatedate date,
+board_type number(1,0) not null
+);
+
+
+alter table keijiban add constraint pk_keijiban primary key(bno);
+
+--掲示板番号を順番に与えるためのシーケンス
+CREATE SEQUENCE seq_keijiban
+       INCREMENT BY 1
+       START WITH 1
+       MINVALUE 1
+       MAXVALUE 9999
+       NOCYCLE
+       NOCACHE
+       NOORDER;
+
+
+
