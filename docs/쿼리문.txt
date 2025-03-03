@@ -1,3 +1,21 @@
+CREATE TABLE kojinnjyouhou(
+bango number(10,0),
+id varchar2(50) not null primary key,
+password varchar2(100) not null,
+namae varchar2(100) not null,
+tannjyoubi varchar2(100),
+mail varchar2(100),
+dennwabanngo varchar2(100),
+regDate date default sysdate,
+authority varchar2(100)
+);
+
+CREATE TABLE users(
+username varchar2(50) not null primary key,
+      password varchar2(50) not null,
+      enabled char(1) default '1'
+);
+
 
 
 
@@ -29,22 +47,26 @@ CREATE SEQUENCE seq_kaiinjyouhou
 
 
 
-
+--
 
  -- 会員権限関連テーブル     
  create table authorities2 (
-      name varchar2(100) not null,
+      username varchar2(100) not null,
       authority varchar2(100) not null,
-      constraint fk_authorities_users foreign key(name) references users(name));
+      id varchar2(100) not null,
+      constraint fk_authorities_users foreign key(username) references users(username));
+   
       
- create unique index ix_auth_username on authorities (name,authority);
+ create unique index ix_auth_username on authorities (username,authority);
 
 --test data
 insert into users (username, password) values ('user00','pw00');
 insert into users (username, password) values ('admin00','pw00');
 
-insert into authorities (username, authority) values ('user00','ROLE_USER');
-insert into authorities (username, authority) values ('admin00','ROLE_ADMIN');
+insert into authorities2 (username, authority, id) values ('user00','ROLE_USER', 'user00');
+insert into authorities2 (username, authority, id) values ('admin00','ROLE_ADMIN', 'admin00');
+
+insert into kojinnjyouhou (bango, id, password, namae, tannjyoubi, mail, dennwabanngo, regDate, authority) values (1, 'admin00', 'pw00', 'admin00', '2025-02-02', 'abc@a.com', '010-0000-1234', sysdate, 'ROLE_ADMIN');
 
 
 

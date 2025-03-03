@@ -79,8 +79,8 @@
 
 	<select id="read" resultMap="memberMap">
 		SELECT
-		kojin.id, password, namae,
-		tannjyoubi, mail, dennwabanngo, regDate, authority
+		kojin.id, kojin.password, kojin.namae,
+		kojin.tannjyoubi, kojin.mail, kojin.dennwabanngo, kojin.regDate, kojin.authority
 		FROM
 		kojinnjyouhou
 		kojin LEFT OUTER JOIN
